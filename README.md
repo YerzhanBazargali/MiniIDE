@@ -86,7 +86,7 @@ MiniIDE/
 
 `Python` `PyQt6` `Pygame` `PyInstaller` `QProcess` `XOR Encryption`
 
-## 🏗️ Architecture
+## 🏗️ Жоба архитектурасы
 
 - **GUI:** PyQt6 негізіндегі desktop интерфейс  
 - **Code Execution:** QProcess арқылы оқшауланған код орындау  
@@ -94,12 +94,29 @@ MiniIDE/
 - **Storage:** Әр қолданушы үшін жеке, шифрланған қалталар  
 - **Packaging:** PyInstaller арқылы EXE жинақтау  
 
-## ⚠️ Limitations
+## ⚠️ Шектеулері
 
 - Windows-пен ғана жұмыс істейді (PyInstaller build)  
 - Толық sandbox емес (QProcess арқылы базалық оқшаулау)  
 - `python_env/` репозиторийде жоқ (көлеміне байланысты)  
 
+## 🤔 Неге VS Code емес?
+
+MiniIDE келесі жағдайлар үшін жасалған:
+
+- Орнатуға рұқсат жоқ  
+- Интернет шектеулі  
+- Бір компьютерде бірнеше оқушы жұмыс істейді  
+
+VS Code — қуатты құрал, бірақ орнатуды және баптауды талап етеді.  
+MiniIDE — бірден іске қосылады, ешқандай дайындықсыз.
+
+## 🚧 Болашақ жоспарлар (Roadmap)
+
+- [ ] Linux жүйесін қолдау
+- [ ] Қауіпсіз орындалу ортасын жақсарту (sandbox)
+- [ ] Оқушы жобаларын бұлт арқылы сақтау
+- [ ] Мұғалімге арналған басқару панелі
 ---
 
 ## Русский
@@ -213,6 +230,29 @@ MiniIDE/
 - **Базовая изоляция процессов** — не является полноценной песочницей (ученик с опытом может выйти за пределы)
 - **python_env/ не в репозитории** — из-за размера, скачивается отдельно (см. кнопку выше)
 - **XOR — обфускация, не шифрование** — см. примечание в разделе технологий
+
+### 🤔 Почему не VS Code?
+
+VS Code — мощный инструмент, но в школьном классе он требует:
+- Установки на каждый компьютер
+- Прав администратора
+- Настройки Python окружения
+- Интернета для расширений
+
+**MiniIDE** создан для ограниченных условий:
+- Компьютеры без прав администратора
+- Медленный или отсутствующий интернет
+- Один компьютер на несколько учеников в разное время
+
+MiniIDE не заменяет VS Code. Он решает задачу, которую VS Code не решает — **zero-setup программирование в школьном классе**.
+
+## 🚧 Планы развития (Roadmap)
+
+- [ ] **Linux support** — упаковка в AppImage
+- [ ] **Настоящая песочница** — ограничение доступа к файловой системе
+- [ ] **Cloud sync** — чтобы ученик мог продолжить дома
+- [ ] **Дашборд учителя** — просмотр работ всех учеников
+- [ ] **Поддержка MicroPython** — для уроков с микроконтроллерами
 
 ### 💡 Применение в классе
 
@@ -329,6 +369,28 @@ MiniIDE/
 - Python Runtime: Embedded portable interpreter (python_env)
 - Storage: Per-user encrypted directories (XOR-based)
 - Packaging: PyInstaller (single EXE distribution)
+
+## ⚠️ Limitations
+
+- Windows-only (due to PyInstaller build)
+- Not a secure sandbox (process isolation is basic)
+- python_env not included in repo due to size
+
+## 🤔 Why not VS Code?
+
+MiniIDE is designed for constrained classroom environments where:
+- Installation is restricted
+- Internet access is limited
+- Students share computers
+
+VS Code is powerful, but requires setup and admin access. MiniIDE works out of the box.
+
+## 🚧 Roadmap
+
+- [ ] Linux support
+- [ ] True sandboxing (restricted execution)
+- [ ] Cloud sync for student projects
+- [ ] Teacher dashboard
 
 ### 💡 Real Classroom Use
 
