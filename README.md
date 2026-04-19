@@ -86,6 +86,20 @@ MiniIDE/
 
 `Python` `PyQt6` `Pygame` `PyInstaller` `QProcess` `XOR Encryption`
 
+## 🏗️ Architecture
+
+- **GUI:** PyQt6 негізіндегі desktop интерфейс  
+- **Code Execution:** QProcess арқылы оқшауланған код орындау  
+- **Python Runtime:** `python_env/` ішінде портативті интерпретатор  
+- **Storage:** Әр қолданушы үшін жеке, шифрланған қалталар  
+- **Packaging:** PyInstaller арқылы EXE жинақтау  
+
+## ⚠️ Limitations
+
+- Windows-пен ғана жұмыс істейді (PyInstaller build)  
+- Толық sandbox емес (QProcess арқылы базалық оқшаулау)  
+- `python_env/` репозиторийде жоқ (көлеміне байланысты)  
+
 ---
 
 ## Русский
@@ -184,6 +198,16 @@ MiniIDE/
 ### 🛠️ Стек технологий
 
 `Python` `PyQt6` `Pygame` `PyInstaller` `QProcess` `QFileSystemModel` `XOR Encryption`
+
+### 🏗️ Архитектура проекта
+
+- **GUI**: PyQt6 — десктопный интерфейс с файловым деревом и редактором кода
+- **Запуск кода**: изолированный вызов через QProcess (не блокирует интерфейс)
+- **Python Runtime**: встроенный портативный интерпретатор из папки `python_env/`
+- **Хранение данных**: локальные папки учеников с XOR-шифрованием (по логину)
+- **Сборка**: PyInstaller — единый EXE-файл для распространения
+
+
 
 ### 💡 Применение в классе
 
@@ -292,6 +316,14 @@ MiniIDE/
 ### 🛠️ Tech Stack
 
 `Python` `PyQt6` `Pygame` `PyInstaller` `QProcess` `QFileSystemModel` `XOR Encryption`
+
+### 🏗️ Architecture
+
+- GUI: PyQt6-based desktop interface
+- Code Execution: Isolated execution via QProcess
+- Python Runtime: Embedded portable interpreter (python_env)
+- Storage: Per-user encrypted directories (XOR-based)
+- Packaging: PyInstaller (single EXE distribution)
 
 ### 💡 Real Classroom Use
 
