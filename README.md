@@ -37,6 +37,23 @@
 - 💾 Файлдарды шифрлап сақтау (XOR)
 - ⌨️ F5 — іске қосу, Ctrl+S — сақтау
 
+## 📸 Скриншоттар
+
+![Авторизация және тіркелу](screenshots/authReg.png)
+*Кіру және тіркелгі жасау терезесі. Әр оқушы өз логинімен кіреді — деректер шифрланады.*
+
+![Басты бет](screenshots/mainPage.png)
+*MiniIDE басты терезесі. Сол жақта файл ағашы, ортада код редакторы, төменде нәтиже шығатын консоль.*
+
+![tkinter кодын іске қосу](screenshots/tkinter.png)
+*tkinter кітапханасымен жазылған графикалық терезені іске қосу мысалы.*
+
+![Pygame кодын іске қосу](screenshots/pygame.png)
+*Pygame арқылы ойын кодын іске қосу. Портативті ортада дұрыс жұмыс істейді.*
+
+![Суреттерді жүктеу](screenshots/images.png)
+*MiniIDE ішінен PNG, JPG, GIF суреттерін ашу және қарау мүмкіндігі.*
+
 ### 🚀 Орнату және іске қосу
 
 **1. Дайындық**
@@ -97,6 +114,23 @@ MiniIDE/
 - 🎵 Воспроизведение аудио (MP3, WAV)
 - 💾 Шифрованное сохранение файлов (XOR по логину)
 - ⌨️ Горячие клавиши: F5 — запуск, Ctrl+S — сохранение
+
+## 📸 Скриншоты
+
+![Авторизация и регистрация](screenshots/authReg.png)
+*Окно входа и создания аккаунта. Каждый ученик входит под своим логином — данные шифруются.*
+
+![Главное окно](screenshots/mainPage.png)
+*Главное окно MiniIDE. Слева — дерево файлов, в центре — редактор кода, внизу — консоль вывода.*
+
+![Запуск кода tkinter](screenshots/tkinter.png)
+*Пример запуска графического окна на библиотеке tkinter.*
+
+![Запуск кода Pygame](screenshots/pygame.png)
+*Запуск игрового кода на Pygame. Работает в портативной среде без установки.*
+
+![Просмотр изображений](screenshots/imageViewer.png)
+*Открытие и просмотр изображений (PNG, JPG, GIF) прямо в MiniIDE.*
 
 ### 🚀 Установка и запуск
 
@@ -188,6 +222,23 @@ Installing Python in a school computer lab is a recurring problem: version misma
 - 🎵 Audio playback (MP3, WAV)
 - 💾 Encrypted file storage (XOR keyed by username)
 - ⌨️ Keyboard shortcuts: F5 to run, Ctrl+S to save
+
+## 📸 Screenshots
+
+![Login and Registration](screenshots/authReg.png)
+*Login and account creation window. Each student logs in with their own credentials — data is encrypted.*
+
+![Main Window](screenshots/mainPage.png)
+*MiniIDE main window. Left: file tree, center: code editor, bottom: output console.*
+
+![Running tkinter Code](screenshots/tkinter.png)
+*Example of running a graphical window using the tkinter library.*
+
+![Running Pygame Code](screenshots/pygame.png)
+*Running game code with Pygame. Works in a portable environment with no installation required.*
+
+![Viewing Images](screenshots/imageViewer.png)
+*Opening and viewing images (PNG, JPG, GIF) directly inside MiniIDE.*
 
 ### 🚀 Installation & Setup
 
