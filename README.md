@@ -375,6 +375,7 @@ MiniIDE/
 - Windows-only (due to PyInstaller build)
 - Not a secure sandbox (process isolation is basic)
 - python_env not included in repo due to size
+> Note: XOR encryption is used as a lightweight obfuscation method, not as secure encryption.
 
 ## 🤔 Why not VS Code?
 
