@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# MiniIDE specific
+students/
+*.exe
+
+# OS
+.DS_Store
+Thumbs.db
