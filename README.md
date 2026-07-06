@@ -4,7 +4,7 @@
 
 ## ⬇️ Скачать / Жүктеу / Download
 
-[![Download MiniIDE](https://img.shields.io/badge/⬇️%20Download%20MiniIDE%20v1.0.0-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1fqYYHSeln0vuOwAM2HuHBh0AGEJNsEun/view?usp=sharing)
+[![Download MiniIDE](https://img.shields.io/badge/⬇️%20Download%20MiniIDE%20v1.0.0-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/14AxpIhI3Fu9XzbIhAeRQepFj9b667HSO?usp=sharing)
 
 > Windows 10/11 · Установка не требуется · ~74 MB
 
