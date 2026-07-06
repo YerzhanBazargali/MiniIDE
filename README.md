@@ -37,7 +37,7 @@
 - 💾 Файлдарды шифрлап сақтау (XOR)
 - ⌨️ F5 — іске қосу, Ctrl+S — сақтау
 
-## 📸 Скриншоттар
+### 📸 Скриншоттар
 
 ![Авторизация және тіркелу](screenshots/authReg.png)
 *Кіру және тіркелгі жасау терезесі. Әр оқушы өз логинімен кіреді — деректер шифрланады.*
@@ -51,7 +51,7 @@
 ![Pygame кодын іске қосу](screenshots/pygame.png)
 *Pygame арқылы ойын кодын іске қосу. Портативті ортада дұрыс жұмыс істейді.*
 
-![Суреттерді жүктеу](screenshots/images.png)
+![Суреттерді жүктеу](screenshots/imageViewer.png)
 *MiniIDE ішінен PNG, JPG, GIF суреттерін ашу және қарау мүмкіндігі.*
 
 ### 🚀 Орнату және іске қосу
@@ -73,6 +73,7 @@ MiniIDE/
 - `MyMiniIDE.exe` файлын іске қосыңыз
 - Логин мен құпия сөзіңізді енгізіңіз
 - Бірінші кіру кезінде аккаунт автоматты түрде жасалады — деректерді есте сақтаңыз!
+- Логинде тек әріптер, сандар, `-` және `_` болуы мүмкін (бос орын мен нүктесіз)
 
 **⚠️ Ақаулықтарды жою**
 
@@ -82,11 +83,27 @@ MiniIDE/
 | Бағдарлама ашылмайды | Әкімші ретінде іске қосыңыз |
 | Антивирус бұғаттайды | Ерекшеліктерге қосыңыз (PyInstaller қолданбаларына жалған оң нәтиже) |
 
+### 📁 Бастапқы код құрылымы
+
+```
+MiniIDE/
+├── main.py            # IDE негізгі терезесі (UI)
+├── auth.py            # Логин және деректерді XOR арқылы қорғау
+├── storage.py         # Оқушы қалтасындағы файл операциялары
+├── process_runner.py  # Кодты QProcess арқылы іске қосу
+├── EditorPQT.py       # Синтаксисті бөлектейтін код редакторы
+├── icon.ico           # Қолданба иконкасы
+├── python_env/        # Портативті Python + Pygame (репозиторийде жоқ)
+└── students/          # Бірінші іске қосқанда автоматты жасалады
+```
+
+> ⚠️ `python_env/` көлеміне байланысты репозиторийге жүктелмеген — жоғарыдағы батырма арқылы дайын архивті жүктеп алыңыз.
+
 ### 🛠️ Технологиялар
 
 `Python` `PyQt6` `Pygame` `PyInstaller` `QProcess` `XOR Encryption`
 
-## 🏗️ Жоба архитектурасы
+### 🏗️ Жоба архитектурасы
 
 - **GUI:** PyQt6 негізіндегі desktop интерфейс  
 - **Code Execution:** QProcess арқылы оқшауланған код орындау  
@@ -94,13 +111,13 @@ MiniIDE/
 - **Storage:** Әр қолданушы үшін жеке, шифрланған қалталар  
 - **Packaging:** PyInstaller арқылы EXE жинақтау  
 
-## ⚠️ Шектеулері
+### ⚠️ Шектеулері
 
 - Windows-пен ғана жұмыс істейді (PyInstaller build)  
 - Толық sandbox емес (QProcess арқылы базалық оқшаулау)  
 - `python_env/` репозиторийде жоқ (көлеміне байланысты)  
 
-## 🤔 Неге VS Code емес?
+### 🤔 Неге VS Code емес?
 
 MiniIDE келесі жағдайлар үшін жасалған:
 
@@ -111,7 +128,7 @@ MiniIDE келесі жағдайлар үшін жасалған:
 VS Code — қуатты құрал, бірақ орнатуды және баптауды талап етеді.  
 MiniIDE — бірден іске қосылады, ешқандай дайындықсыз.
 
-## 🚧 Болашақ жоспарлар (Roadmap)
+### 🚧 Болашақ жоспарлар (Roadmap)
 
 - [ ] Linux жүйесін қолдау
 - [ ] Қауіпсіз орындалу ортасын жақсарту (sandbox)
@@ -146,7 +163,7 @@ MiniIDE — бірден іске қосылады, ешқандай дайын�
 - 💾 Шифрованное сохранение файлов (XOR по логину)
 - ⌨️ Горячие клавиши: F5 — запуск, Ctrl+S — сохранение
 
-## 📸 Скриншоты
+### 📸 Скриншоты
 
 ![Авторизация и регистрация](screenshots/authReg.png)
 *Окно входа и создания аккаунта. Каждый ученик входит под своим логином — данные шифруются.*
@@ -183,6 +200,7 @@ MiniIDE/
 **3. Первый запуск**
 - Запустите `MyMiniIDE.exe`
 - Введите логин и пароль — при первом входе аккаунт создаётся автоматически
+- Логин может содержать только буквы, цифры, `-` и `_` (без пробелов и точек)
 - Запомните данные для следующих входов!
 
 **4. Работа в редакторе**
@@ -203,7 +221,10 @@ MiniIDE/
 
 ```
 MiniIDE/
-├── main.py            # Основное приложение (IDE, авторизация, UI)
+├── main.py            # Главное окно IDE (UI, связывание сигналов)
+├── auth.py            # Логин и XOR-шифрование данных пользователя
+├── storage.py         # Файловые операции в папке ученика (чтение/запись/загрузка)
+├── process_runner.py  # Запуск кода через QProcess
 ├── EditorPQT.py       # Редактор кода с подсветкой синтаксиса
 ├── icon.ico           # Иконка приложения
 ├── python_env/        # Портативный Python + Pygame (не в репозитории)
@@ -224,7 +245,7 @@ MiniIDE/
 - **Хранение данных**: локальные папки учеников с XOR-шифрованием (по логину)
 - **Сборка**: PyInstaller — единый EXE-файл для распространения
 
-## ⚠️ Известные ограничения
+### ⚠️ Известные ограничения
 
 - **Только Windows** — сборка под PyInstaller, Linux/macOS не поддерживаются
 - **Базовая изоляция процессов** — не является полноценной песочницей (ученик с опытом может выйти за пределы)
@@ -246,7 +267,7 @@ VS Code — мощный инструмент, но в школьном клас
 
 MiniIDE не заменяет VS Code. Он решает задачу, которую VS Code не решает — **zero-setup программирование в школьном классе**.
 
-## 🚧 Планы развития (Roadmap)
+### 🚧 Планы развития (Roadmap)
 
 - [ ] **Linux support** — упаковка в AppImage
 - [ ] **Настоящая песочница** — ограничение доступа к файловой системе
@@ -292,7 +313,7 @@ Installing Python in a school computer lab is a recurring problem: version misma
 - 💾 Encrypted file storage (XOR keyed by username)
 - ⌨️ Keyboard shortcuts: F5 to run, Ctrl+S to save
 
-## 📸 Screenshots
+### 📸 Screenshots
 
 ![Login and Registration](screenshots/authReg.png)
 *Login and account creation window. Each student logs in with their own credentials — data is encrypted.*
@@ -329,6 +350,7 @@ MiniIDE/
 **3. First Launch**
 - Run `MyMiniIDE.exe`
 - Enter a login and password — account is created automatically on first login
+- Login can only contain letters, digits, `-` and `_` (no spaces or dots)
 - Remember your credentials for future sessions!
 
 **4. Using the Editor**
@@ -349,7 +371,10 @@ MiniIDE/
 
 ```
 MiniIDE/
-├── main.py            # Main app — IDE, auth, UI logic
+├── main.py            # Main IDE window (UI, signal wiring)
+├── auth.py            # Login and XOR obfuscation of user data
+├── storage.py         # File operations in the student's folder (read/write/upload)
+├── process_runner.py  # Runs student code via QProcess
 ├── EditorPQT.py       # Code editor with syntax highlighting
 ├── icon.ico           # Application icon
 ├── python_env/        # Portable Python + Pygame (not in repo — too large)
@@ -370,14 +395,14 @@ MiniIDE/
 - Storage: Per-user encrypted directories (XOR-based)
 - Packaging: PyInstaller (single EXE distribution)
 
-## ⚠️ Limitations
+### ⚠️ Limitations
 
 - Windows-only (due to PyInstaller build)
 - Not a secure sandbox (process isolation is basic)
 - python_env not included in repo due to size
 > Note: XOR encryption is used as a lightweight obfuscation method, not as secure encryption.
 
-## 🤔 Why not VS Code?
+### 🤔 Why not VS Code?
 
 MiniIDE is designed for constrained classroom environments where:
 - Installation is restricted
@@ -386,7 +411,7 @@ MiniIDE is designed for constrained classroom environments where:
 
 VS Code is powerful, but requires setup and admin access. MiniIDE works out of the box.
 
-## 🚧 Roadmap
+### 🚧 Roadmap
 
 - [ ] Linux support
 - [ ] True sandboxing (restricted execution)

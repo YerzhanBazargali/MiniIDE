@@ -6,6 +6,8 @@ from pygments.lexers import PythonLexer
 from pygments.styles import get_style_by_name
 
 class PygmentsHighlighter(QSyntaxHighlighter):
+    """Подсветка синтаксиса Python на основе Pygments, в цветовой схеме Programiz."""
+
     def __init__(self, parent):
         super().__init__(parent)
         self.lexer = PythonLexer()
@@ -47,6 +49,8 @@ class PygmentsHighlighter(QSyntaxHighlighter):
                 self.setFormat(index, len(value), fmt)
 
 class LineNumberArea(QWidget):
+    """Узкая полоса слева от редактора с номерами строк."""
+
     def __init__(self, editor):
         super().__init__(editor)
         self.editor = editor
@@ -58,6 +62,8 @@ class LineNumberArea(QWidget):
         self.editor.lineNumberAreaPaintEvent(event)
 
 class QCodeEditor(QPlainTextEdit):
+    """Текстовый редактор с подсветкой синтаксиса, номерами строк и авто-отступом после ':'."""
+
     def __init__(self):
         super().__init__()
         self.line_number_area = LineNumberArea(self)
