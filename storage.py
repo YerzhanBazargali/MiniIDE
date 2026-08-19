@@ -74,7 +74,7 @@ class FileStorage:
         base = os.path.basename(name.strip())
         if not base or base in (".", ".."):
             raise ValueError("Недопустимое имя файла")
-        if not base.endswith(".py"):
+        if not base.lower().endswith(".py"):
             base += ".py"
         _check_not_reserved(base, "Выберите другое имя.")
         return os.path.join(self.user_folder, base)

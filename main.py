@@ -317,7 +317,7 @@ class MiniIDE(QWidget):
         в _confirm_discard_changes(), чтобы понять, можно ли продолжать действие,
         которое ждало ответа "сохранить перед тем как заменить/закрыть"."""
         path = self.current_file or os.path.join(self.user_folder, "unnamed.py")
-        if not path.endswith(".py"):
+        if not path.lower().endswith(".py"):
             self.log_area.appendPlainText("⚠ Сохранение доступно только для .py файлов")
             return False
         try:
@@ -346,7 +346,7 @@ class MiniIDE(QWidget):
         # файл, писать в него нельзя, иначе F5 зашифрует и запишет код поверх
         # чужого изображения/аудио. В этом случае ведём себя как при
         # отсутствии открытого файла — создаём untitled_script.py.
-        if self.current_file and self.current_file.endswith(".py"):
+        if self.current_file and self.current_file.lower().endswith(".py"):
             run_path = self.current_file
         else:
             run_path = os.path.join(self.user_folder, "untitled_script.py")
