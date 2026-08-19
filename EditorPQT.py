@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QPlainTextEdit, QWidget
-from PyQt6.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QPainter
+from PyQt6.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QPainter, QTextCursor
 from PyQt6.QtCore import Qt, QRect, QSize
 from pygments.lexers import PythonLexer
 
@@ -104,18 +104,52 @@ class QCodeEditor(QPlainTextEdit):
             self.ensureCursorVisible()
             return # Прерываем стандартную обработку Enter
 
-        if event.key() == Qt.Key.Key_Tab and not self.textCursor().hasSelection():
+        if event.key() == Qt.Key.Key_Tab:
             # По умолчанию QPlainTextEdit вставляет символ табуляции. Автоотступ
             # после ':' выше всегда добавляет пробелы — смешение табов и
             # пробелов в одном блоке кода вызывает TabError при запуске.
-            # Условие на hasSelection() важно: insertText() с активным
-            # выделением заменяет его на вставляемый текст — без этой проверки
-            # Tab по выделенному блоку кода стирал бы весь выделенный текст.
-            self.textCursor().insertText("    ")
+            cursor = self.textCursor()
+            if cursor.hasSelection():
+                # insertText() с активным выделением заменяет его на
+                # вставляемый текст — обычный однострочный Tab (и стандартная
+                # обработка Qt, в которую мы раньше проваливались при
+                # выделении) стёр бы весь выделенный код. Вместо этого
+                # отступаем каждую задетую строку на 4 пробела, сохраняя текст.
+                self._indent_selected_lines()
+            else:
+                cursor.insertText("    ")
             return
 
         # Для всех остальных клавиш используем стандартное поведение
         super().keyPressEvent(event)
+
+    def _indent_selected_lines(self):
+        """Добавляет 4 пробела в начало каждой строки, задетой текущим
+        выделением (Tab по выделенному блоку кода)."""
+        cursor = self.textCursor()
+        doc = self.document()
+
+        start_block = doc.findBlock(cursor.selectionStart())
+        end_block = doc.findBlock(cursor.selectionEnd())
+        # Если выделение заканчивается ровно на начале строки (курсор в самом
+        # начале последней строки), эта строка фактически не выделена — как и
+        # в большинстве редакторов, её не трогаем.
+        if end_block.position() == cursor.selectionEnd() and end_block.blockNumber() != start_block.blockNumber():
+            end_block = end_block.previous()
+
+        edit_cursor = self.textCursor()
+        edit_cursor.beginEditBlock()
+        for block_number in range(start_block.blockNumber(), end_block.blockNumber() + 1):
+            block_cursor = QTextCursor(doc.findBlockByNumber(block_number))
+            block_cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+            block_cursor.insertText("    ")
+        edit_cursor.endEditBlock()
+
+        last_block = doc.findBlockByNumber(end_block.blockNumber())
+        new_cursor = self.textCursor()
+        new_cursor.setPosition(start_block.position())
+        new_cursor.setPosition(last_block.position() + last_block.length() - 1, QTextCursor.MoveMode.KeepAnchor)
+        self.setTextCursor(new_cursor)
 
     
     def line_number_area_width(self):
