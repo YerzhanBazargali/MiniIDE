@@ -12,7 +12,10 @@ from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 from EditorPQT import QCodeEditor
 from auth import LoginDialog
-from storage import FileStorage, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, RUN_TEMP_FILENAME
+from storage import (
+    FileStorage, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, UNSUPPORTED_EXTENSIONS,
+    UPLOAD_ALLOWED_EXTENSIONS, RUN_TEMP_FILENAME
+)
 from process_runner import ProcessRunner
 
 
@@ -251,6 +254,15 @@ class MiniIDE(QWidget):
     def open_file(self, index):
         path = self.file_model.filePath(index)
         ext = os.path.splitext(path.lower())[1]
+
+        if ext in UNSUPPORTED_EXTENSIONS:
+            # Не трогаем current_file/редактор вообще — иначе пришлось бы
+            # решать те же вопросы (Ctrl+S, F5 поверх файла), что и для
+            # картинок/аудио, ради формата, который IDE всё равно не умеет
+            # показать.
+            self.log_area.appendPlainText(f"⚠ Формат «{ext}» не поддерживается для просмотра в MiniIDE.")
+            return
+
         is_text = ext not in IMAGE_EXTENSIONS and ext not in AUDIO_EXTENSIONS
 
         # Открытие картинки/аудио не трогает содержимое редактора — спрашивать
@@ -397,7 +409,10 @@ class MiniIDE(QWidget):
         self.log_area.appendPlainText("\n--- Процесс завершен ---")
 
     def upload_file(self):
-        f, _ = QFileDialog.getOpenFileName(self, "Загрузить")
+        patterns = " ".join(f"*{ext}" for ext in UPLOAD_ALLOWED_EXTENSIONS)
+        f, _ = QFileDialog.getOpenFileName(
+            self, "Загрузить", "", f"Поддерживаемые файлы ({patterns})"
+        )
         if not f:
             return
 
