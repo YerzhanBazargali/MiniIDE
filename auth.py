@@ -137,8 +137,17 @@ class LoginDialog(QDialog):
         self.buttons.rejected.connect(self.reject)
         layout.addWidget(self.buttons)
 
+        self._login = None
+
     def validate_and_accept(self):
-        user = self.login_input.text().strip()
+        # Приводим логин к нижнему регистру: он используется и как ключ в
+        # auth_data.dat, и как имя папки students/<login>/, и как ключ XOR-
+        # шифрования файлов. Windows-файловая система регистронезависима
+        # (students/Ivan и students/ivan — одна и та же папка), а без
+        # нормализации словарь и XOR-ключ считали бы их разными аккаунтами —
+        # тот же ученик, войдя в другой раз с другим регистром, получал бы
+        # нечитаемые (расшифрованные не тем ключом) старые файлы.
+        user = self.login_input.text().strip().lower()
         password = self.pass_input.text().strip()
         if not user or not password:
             QMessageBox.warning(self, "Ошибка", "Заполните все поля!")
@@ -158,9 +167,10 @@ class LoginDialog(QDialog):
             return
 
         if ok:
+            self._login = user
             self.accept()
         else:
             QMessageBox.critical(self, "Ошибка", "Неверный пароль!")
 
     def get_data(self):
-        return self.login_input.text().strip()
+        return self._login

@@ -4,9 +4,11 @@
 
 ## ⬇️ Скачать / Жүктеу / Download
 
-[![Download MiniIDE](https://img.shields.io/badge/⬇️%20Download%20MiniIDE%20v1.0.0-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/14AxpIhI3Fu9XzbIhAeRQepFj9b667HSO?usp=sharing)
+[![Download MiniIDE](https://img.shields.io/badge/⬇️%20Download%20MiniIDE%20v1.1.0-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1fqYYHSeln0vuOwAM2HuHBh0AGEJNsEun/view?usp=sharing)
 
 > Windows 10/11 · Установка не требуется · ~74 MB
+
+> ⚠️ Бейдж показывает версию исходного кода в репозитории. Архив по ссылке нужно переупаковать и перезалить вручную после последних правок — если он ещё не обновлён, там может быть более старая сборка (v1.0.0). / Бейдж репозиторийдегі бастапқы код нұсқасын көрсетеді. Сілтемедегі мұрағатты соңғы түзетулерден кейін қолмен қайта жинап, қайта жүктеу керек. / The badge reflects the source code version in this repository. The linked archive must be manually repackaged and re-uploaded after the latest fixes — until then it may still be the older v1.0.0 build.
 
 ---
 

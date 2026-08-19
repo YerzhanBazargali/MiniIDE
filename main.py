@@ -12,7 +12,7 @@ from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 from EditorPQT import QCodeEditor
 from auth import LoginDialog
-from storage import FileStorage, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS
+from storage import FileStorage, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, RUN_TEMP_FILENAME
 from process_runner import ProcessRunner
 
 
@@ -195,6 +195,26 @@ class MiniIDE(QWidget):
 
         self.current_file = None
 
+    def _confirm_discard_changes(self):
+        """Если в редакторе есть несохранённые изменения — спрашивает, что с ними
+        делать, прежде чем их заменить (открыть другой файл/создать новый/закрыть
+        окно). Возвращает True, если можно продолжать действие (сохранили или
+        явно отказались), False — если пользователь передумал (Отмена)."""
+        if not self.editor.document().isModified():
+            return True
+
+        reply = QMessageBox.question(
+            self, "Несохранённые изменения",
+            "В редакторе есть несохранённые изменения. Сохранить их?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel
+        )
+        if reply == QMessageBox.StandardButton.Cancel:
+            return False
+        if reply == QMessageBox.StandardButton.Yes:
+            return self.save_file()
+        return True  # No — осознанно отбрасываем изменения
+
     def create_new_file(self):
         name, ok = QInputDialog.getText(self, "Новый файл", "Имя файла:", text="script.py")
         if not (ok and name.strip()):
@@ -214,6 +234,9 @@ class MiniIDE(QWidget):
             if reply != QMessageBox.StandardButton.Yes:
                 return
 
+        if not self._confirm_discard_changes():
+            return
+
         try:
             self.storage.create_file(path)
         except OSError as e:
@@ -222,13 +245,22 @@ class MiniIDE(QWidget):
 
         self.current_file = path
         self.editor.setPlainText("")
+        self.editor.document().setModified(False)
         self.stack.setCurrentIndex(0)
 
     def open_file(self, index):
         path = self.file_model.filePath(index)
+        ext = os.path.splitext(path.lower())[1]
+        is_text = ext not in IMAGE_EXTENSIONS and ext not in AUDIO_EXTENSIONS
+
+        # Открытие картинки/аудио не трогает содержимое редактора — спрашивать
+        # про несохранённые изменения нужно только когда мы реально собираемся
+        # заменить текст в редакторе содержимым другого файла.
+        if is_text and not self._confirm_discard_changes():
+            return
+
         self.current_file = path
         self.setWindowTitle(f"IDE — {self.user_name} — {os.path.basename(path)}")
-        ext = os.path.splitext(path.lower())[1]
 
         # Останавливаем плеер и сбрасываем текст кнопки при открытии ЛЮБОГО
         # файла (не только другого аудио) — иначе кнопка "Пауза" останется,
@@ -252,23 +284,38 @@ class MiniIDE(QWidget):
 
         else:
             try:
-                self.editor.setPlainText(self.storage.read_text(path))
+                text = self.storage.read_text(path)
             except Exception as e:
+                # Файл не прочитан (например, временно заблокирован антивирусом
+                # или сбой на флешке) — не оставляем current_file указывающим на
+                # него: иначе Ctrl+S зашифрует и запишет этот текст ошибки прямо
+                # поверх настоящего содержимого файла, безвозвратно его стерев.
+                self.current_file = None
                 self.editor.setPlainText(f"Ошибка чтения файла:\n{e}")
+                self.editor.document().setModified(False)
+                self.stack.setCurrentIndex(0)
+                return
 
+            self.editor.setPlainText(text)
+            self.editor.document().setModified(False)
             self.stack.setCurrentIndex(0)
 
     def save_file(self):
+        """Сохраняет редактор в файл. Возвращает True при успехе — используется
+        в _confirm_discard_changes(), чтобы понять, можно ли продолжать действие,
+        которое ждало ответа "сохранить перед тем как заменить/закрыть"."""
         path = self.current_file or os.path.join(self.user_folder, "unnamed.py")
         if not path.endswith(".py"):
             self.log_area.appendPlainText("⚠ Сохранение доступно только для .py файлов")
-            return
+            return False
         try:
             self.storage.write_text(path, self.editor.toPlainText())
         except OSError as e:
             self.log_area.appendPlainText(f"⚠ Не удалось сохранить файл: {e}")
-            return
+            return False
+        self.editor.document().setModified(False)
         self.log_area.appendPlainText(f"Сохранено: {os.path.basename(path)}")
+        return True
 
     def run_code(self):
         self.log_area.clear()
@@ -292,13 +339,14 @@ class MiniIDE(QWidget):
         # 3. Сохраняем актуальный код из редактора перед запуском (в зашифрованном виде)
         # 4. Создаем ЧИСТУЮ временную копию для интерпретатора (без шифрования!)
         # Чтобы Python мог выполнить этот файл, он должен быть обычным текстом
-        temp_run_file = os.path.join(self.user_folder, ".run_temp.py")
+        temp_run_file = os.path.join(self.user_folder, RUN_TEMP_FILENAME)
         try:
             self.storage.write_text(run_path, self.editor.toPlainText())
             self.storage.write_plain(temp_run_file, self.editor.toPlainText())
         except OSError as e:
             self.log_area.appendPlainText(f"⚠ Не удалось подготовить файл для запуска: {e}")
             return
+        self.editor.document().setModified(False)
 
         # 5. Запуск
         used_fallback = self.runner.run(temp_run_file, self.user_folder)
@@ -332,7 +380,7 @@ class MiniIDE(QWidget):
         self.btn_stop.setEnabled(False)
         # errorOccurred (в отличие от finished) не сопровождается вызовом
         # on_finished, поэтому .run_temp.py нужно убрать явно и здесь.
-        t = os.path.join(self.user_folder, ".run_temp.py")
+        t = os.path.join(self.user_folder, RUN_TEMP_FILENAME)
         self.storage.remove_if_exists(t)
         self.log_area.appendPlainText(f"⚠ {message}")
 
@@ -340,7 +388,7 @@ class MiniIDE(QWidget):
         self.btn_run.setEnabled(True)
         self.btn_stop.setEnabled(False)
         # Удаляем временный файл для запуска
-        t = os.path.join(self.user_folder, ".run_temp.py")
+        t = os.path.join(self.user_folder, RUN_TEMP_FILENAME)
         self.storage.remove_if_exists(t)
         self.log_area.appendPlainText("\n--- Процесс завершен ---")
 
@@ -349,7 +397,12 @@ class MiniIDE(QWidget):
         if not f:
             return
 
-        dest = self.storage.resolve_upload_path(f)
+        try:
+            dest = self.storage.resolve_upload_path(f)
+        except ValueError as e:
+            QMessageBox.warning(self, "Ошибка", str(e))
+            return
+
         if os.path.exists(dest):
             reply = QMessageBox.question(
                 self, "Файл уже существует",
@@ -372,11 +425,15 @@ class MiniIDE(QWidget):
                 self.btn_play.setText("⏸ Пауза")
 
     def closeEvent(self, event):
+        if not self._confirm_discard_changes():
+            event.ignore()
+            return
+
         # Без этого запущенный студентом процесс (особенно pygame-цикл) может
         # остаться висеть в фоне после закрытия окна IDE. stop() сам дожидается
         # завершения (мягко, потом жёстко при необходимости).
         self.runner.stop()
-        self.storage.remove_if_exists(os.path.join(self.user_folder, ".run_temp.py"))
+        self.storage.remove_if_exists(os.path.join(self.user_folder, RUN_TEMP_FILENAME))
         super().closeEvent(event)
 
     def show_context_menu(self, pos):

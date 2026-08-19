@@ -10,6 +10,22 @@ from auth import crypt_data
 IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.gif')
 AUDIO_EXTENSIONS = ('.mp3', '.wav', '.ogg')
 
+# Имя временного незашифрованного файла, который run_code() создаёт для запуска
+# кода интерпретатором и безусловно удаляет после завершения процесса (main.py).
+# Если ученик создаст/загрузит файл с этим именем, оно совпадёт с временным —
+# и такой файл будет удалён вместе с временным. Поэтому это имя запрещено для
+# создания/загрузки (см. resolve_new_file_path/resolve_upload_path).
+RUN_TEMP_FILENAME = ".run_temp.py"
+
+
+def _check_not_reserved(base, action_hint):
+    """Запрещает создание/загрузку файла с именем RUN_TEMP_FILENAME (см. выше)."""
+    if base.lower() == RUN_TEMP_FILENAME.lower():
+        raise ValueError(
+            f"Имя «{RUN_TEMP_FILENAME}» зарезервировано под служебный файл запуска. "
+            f"{action_hint}"
+        )
+
 
 class FileStorage:
     """Обёртка над файловыми операциями внутри папки конкретного пользователя."""
@@ -45,6 +61,7 @@ class FileStorage:
             raise ValueError("Недопустимое имя файла")
         if not base.endswith(".py"):
             base += ".py"
+        _check_not_reserved(base, "Выберите другое имя.")
         return os.path.join(self.user_folder, base)
 
     def create_file(self, path):
@@ -54,7 +71,9 @@ class FileStorage:
 
     def resolve_upload_path(self, source_path):
         """Вычисляет путь назначения для загружаемого файла, не копируя его."""
-        return os.path.join(self.user_folder, os.path.basename(source_path))
+        base = os.path.basename(source_path)
+        _check_not_reserved(base, "Переименуйте файл перед загрузкой.")
+        return os.path.join(self.user_folder, base)
 
     def upload_file(self, source_path):
         """Копирует внешний файл в папку пользователя (перезаписывает при совпадении имени).

@@ -6,6 +6,7 @@ __pycache__/
 # PyInstaller
 build/
 dist/
+_internal/
 *.spec
 
 # MiniIDE specific

@@ -1,8 +1,9 @@
 """Запуск пользовательского кода через QProcess с портативным Python."""
+import codecs
 import os
 import sys
 
-from PyQt6.QtCore import QObject, QProcess, pyqtSignal
+from PyQt6.QtCore import QObject, QProcess, QProcessEnvironment, pyqtSignal
 
 
 class ProcessRunner(QObject):
@@ -21,6 +22,15 @@ class ProcessRunner(QObject):
         self.process.readyReadStandardError.connect(self._handle_err)
         self.process.finished.connect(self.finished.emit)
         self.process.errorOccurred.connect(self._handle_error_occurred)
+
+        # Отдельный инкрементальный декодер на каждый поток: readyRead может
+        # отдать данные так, что многобайтовый UTF-8-символ (например,
+        # кириллица) окажется разрезан ровно на границе двух чанков.
+        # Инкрементальный декодер сам буферизует незавершённый хвост до
+        # следующего чанка — обычный .decode() по чанкам на такой границе
+        # падал бы и уходил в cp1251-фолбэк, портя вывод.
+        self._out_decoder = codecs.getincrementaldecoder("utf-8")()
+        self._err_decoder = codecs.getincrementaldecoder("utf-8")()
 
     def is_running(self):
         return self.process.state() != QProcess.ProcessState.NotRunning
@@ -65,24 +75,46 @@ class ProcessRunner(QObject):
         else:
             py_exe = os.path.join(self.root_dir, "python_env", "python.exe")
 
-        if not os.path.exists(py_exe) and py_exe != "python":
+        if not os.path.exists(py_exe):
             return "python", True
         return py_exe, False
 
     def run(self, script_path, working_dir):
         """Запускает script_path в working_dir. Возвращает True, если использован системный python."""
         py_exe, used_fallback = self.resolve_python_exe()
+        # Сбрасываем декодеры на новый запуск — иначе незавершённый хвост
+        # многобайтового символа, оставшийся от предыдущего процесса (мало
+        # вероятно, но возможно при принудительном kill() посреди вывода),
+        # склеился бы с первым чанком нового запуска.
+        self._out_decoder.reset()
+        self._err_decoder.reset()
+
+        # На Windows дочерний python.exe по умолчанию кодирует stdout/stderr
+        # кодовой страницей консоли (например, cp1251), а не UTF-8. В cp1251
+        # нет специфических казахских букв (ә, қ, ғ, ң, ...) — print() с ними
+        # валит скрипт ученика UnicodeEncodeError'ом ещё до того, как вывод
+        # вообще доходит до наших декодеров. PYTHONIOENCODING заставляет сам
+        # интерпретатор писать UTF-8 независимо от кодовой страницы консоли.
+        # PYTHONUNBUFFERED отключает буферизацию stdout: без него stdout при
+        # перенаправлении в канал (в отличие от stderr) буферизуется блоками,
+        # и строки из stderr в логе могут "обгонять" более ранние по коду
+        # строки из stdout, которые ещё сидят в буфере интерпретатора.
+        env = QProcessEnvironment.systemEnvironment()
+        env.insert("PYTHONIOENCODING", "utf-8")
+        env.insert("PYTHONUNBUFFERED", "1")
+        self.process.setProcessEnvironment(env)
+
         self.process.setWorkingDirectory(working_dir)
         self.process.start(py_exe, [script_path])
         return used_fallback
 
     def _handle_out(self):
         raw = self.process.readAllStandardOutput().data()
-        self.output_received.emit(self._decode(raw))
+        self.output_received.emit(self._decode(raw, self._out_decoder))
 
     def _handle_err(self):
         raw = self.process.readAllStandardError().data()
-        self.error_received.emit(self._decode(raw))
+        self.error_received.emit(self._decode(raw, self._err_decoder))
 
     def _handle_error_occurred(self, error):
         # finished-сигнал в этом случае не приходит, поэтому UI не узнает о сбое
@@ -95,8 +127,13 @@ class ProcessRunner(QObject):
             )
 
     @staticmethod
-    def _decode(raw_data):
+    def _decode(raw_data, decoder):
         try:
-            return raw_data.decode("utf-8")
+            return decoder.decode(raw_data)
         except UnicodeDecodeError:
+            # Не просто разрезанный многобайтовый символ, а действительно
+            # не-UTF8 вывод (например, консоль Windows отдаёт cp1251) —
+            # сбрасываем накопленное состояние декодера и решифруем этот
+            # кусок как cp1251, как и раньше.
+            decoder.reset()
             return raw_data.decode("cp1251", "replace")

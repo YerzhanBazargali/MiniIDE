@@ -1,9 +1,8 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QPlainTextEdit, QWidget, QTextEdit
-from PyQt6.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QPainter, QTextFormat
+from PyQt6.QtWidgets import QApplication, QPlainTextEdit, QWidget
+from PyQt6.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QPainter
 from PyQt6.QtCore import Qt, QRect, QSize
 from pygments.lexers import PythonLexer
-from pygments.styles import get_style_by_name
 
 class PygmentsHighlighter(QSyntaxHighlighter):
     """Подсветка синтаксиса Python на основе Pygments, в цветовой схеме Programiz."""
@@ -32,8 +31,6 @@ class PygmentsHighlighter(QSyntaxHighlighter):
     def highlightBlock(self, text):
         for index, token, value in self.lexer.get_tokens_unprocessed(text):
             # Проходим по иерархии токенов (например, Token.Keyword.Constant -> Token.Keyword)
-            style_key = str(token)
-            
             # Ищем самый близкий ключ в нашем словаре цветов
             color = None
             curr_token = token
@@ -106,6 +103,16 @@ class QCodeEditor(QPlainTextEdit):
             cursor.insertText("\n" + indent)
             self.ensureCursorVisible()
             return # Прерываем стандартную обработку Enter
+
+        if event.key() == Qt.Key.Key_Tab and not self.textCursor().hasSelection():
+            # По умолчанию QPlainTextEdit вставляет символ табуляции. Автоотступ
+            # после ':' выше всегда добавляет пробелы — смешение табов и
+            # пробелов в одном блоке кода вызывает TabError при запуске.
+            # Условие на hasSelection() важно: insertText() с активным
+            # выделением заменяет его на вставляемый текст — без этой проверки
+            # Tab по выделенному блоку кода стирал бы весь выделенный текст.
+            self.textCursor().insertText("    ")
+            return
 
         # Для всех остальных клавиш используем стандартное поведение
         super().keyPressEvent(event)
