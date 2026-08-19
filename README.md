@@ -6,7 +6,7 @@
 
 [![Download MiniIDE](https://img.shields.io/badge/⬇️%20Download%20MiniIDE%20v1.1.0-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/14AxpIhI3Fu9XzbIhAeRQepFj9b667HSO?usp=sharing)
 
-> Windows 10/11 · Установка не требуется · ~74 MB
+> Windows 10/11 · Установка не требуется · около 88 MB
 
 > ⚠️ Бейдж показывает версию исходного кода в репозитории. Архив по ссылке нужно переупаковать и перезалить вручную после последних правок — если он ещё не обновлён, там может быть более старая сборка (v1.0.0). / Бейдж репозиторийдегі бастапқы код нұсқасын көрсетеді. Сілтемедегі мұрағатты соңғы түзетулерден кейін қолмен қайта жинап, қайта жүктеу керек. / The badge reflects the source code version in this repository. The linked archive must be manually repackaged and re-uploaded after the latest fixes — until then it may still be the older v1.0.0 build.
 
@@ -25,7 +25,7 @@
 - 📦 **Портативті Python** — `python_env/` қалтасында дайын, орнатуды қажет етпейді
 - 🎮 **Pygame алдын ала орнатылған** — оқушы бірден ойын жазуды бастай алады
 - 🔐 **Авторизация жүйесі** — әр оқушының жеке аккаунты, бір компьютерде бірнеше оқушы кезекпен жұмыс жасай алады
-- 🙈 **Оқушылар бір-бірінің жұмысын көрмейді** — файлдар шифрланған, тек өз аккаунтымен ашылады, көшіру мүмкін емес
+- 🔐 **Жеке жұмыс қалталары** — мәтіндік файлдар логинге байланысты XOR-обфускациямен сақталады; бұл толық қауіпсіздік немесе sandbox емес
 - 💾 **EXE-файл ретінде жинақталған** — PyInstaller арқылы, ешқандай орнату қажет емес
 - 👩‍🏫 **Мұғалім үшін ыңғайлы** — USB-флешкадан іске қосылады, баптаусыз жұмыс жасайды
 
@@ -82,7 +82,7 @@ MiniIDE/
 | Мәселе | Шешім |
 |--------|-------|
 | Консоль бос | `python_env/` қалтасы `MyMiniIDE.exe` қасында тұруы керек |
-| Бағдарлама ашылмайды | Әкімші ретінде іске қосыңыз |
+| Бағдарлама ашылмайды | Архивті қайта шығарып, `MyMiniIDE.exe` файлын `python_env/` және `_internal/` қалталарымен бірге іске қосыңыз |
 | Антивирус бұғаттайды | Ерекшеліктерге қосыңыз (PyInstaller қолданбаларына жалған оң нәтиже) |
 
 ### 📁 Бастапқы код құрылымы
@@ -108,9 +108,9 @@ MiniIDE/
 ### 🏗️ Жоба архитектурасы
 
 - **GUI:** PyQt6 негізіндегі desktop интерфейс  
-- **Code Execution:** QProcess арқылы оқшауланған код орындау  
+- **Code Execution:** QProcess арқылы бөлек процесс ретінде код орындау  
 - **Python Runtime:** `python_env/` ішінде портативті интерпретатор  
-- **Storage:** Әр қолданушы үшін жеке, шифрланған қалталар  
+- **Storage:** Жеке қалталар; мәтіндік файлдарға XOR-обфускация қолданылады, медиафайлдар өзгеріссіз сақталады  
 - **Packaging:** PyInstaller арқылы EXE жинақтау  
 
 ### ⚠️ Шектеулері
@@ -151,7 +151,7 @@ MiniIDE — бірден іске қосылады, ешқандай дайын�
 - 📦 **Портативный Python** в папке `python_env/` — просто скопируй и запускай
 - 🎮 **Pygame предустановлен** — ученик сразу пишет игры без дополнительных настроек
 - 🔐 **Система авторизации** — у каждого ученика свой логин, несколько учеников работают на одном компьютере в разное время
-- 🙈 **Ученики не видят работы друг друга** — файлы зашифрованы, открываются только под своим аккаунтом, списывание исключено
+- 🔐 **Отдельные рабочие папки** — текстовые файлы сохраняются с XOR-обфускацией по логину; это не полноценная защита от копирования или доступа к данным
 - 💾 **Скомпилирован в EXE** через PyInstaller — установка не нужна
 - 👩‍🏫 **Запускается с флешки** — принёс, запустил, работаешь
 
@@ -209,14 +209,14 @@ MiniIDE/
 - «📄 Создать файл» или «✚ Добавить файл» — создание/загрузка файлов
 - **F5** или «▶ Запустить» — запуск кода
 - Результат и ошибки — в нижней консоли
-- Файлы зашифрованы и защищены от чтения через блокнот
+- Текстовые файлы сохраняются в обфусцированном виде; изображения и аудио хранятся без шифрования
 
 **⚠️ Устранение неполадок**
 
 | Проблема | Решение |
 |----------|---------|
 | Консоль пустая при запуске | Убедитесь, что `python_env/` лежит рядом с `MyMiniIDE.exe` |
-| Программа не открывается | Запустите от имени администратора |
+| Программа не открывается | Повторно распакуйте архив и проверьте, что рядом с `MyMiniIDE.exe` находятся `python_env/` и `_internal/` |
 | Антивирус блокирует | Добавьте в исключения (ложное срабатывание на PyInstaller) |
 
 ### 📁 Структура исходного кода
@@ -242,17 +242,17 @@ MiniIDE/
 ### 🏗️ Архитектура проекта
 
 - **GUI**: PyQt6 — десктопный интерфейс с файловым деревом и редактором кода
-- **Запуск кода**: изолированный вызов через QProcess (не блокирует интерфейс)
+- **Запуск кода**: запуск в дочернем процессе через QProcess; это не полноценная изоляция и остановка зависшего процесса может ненадолго блокировать интерфейс
 - **Python Runtime**: встроенный портативный интерпретатор из папки `python_env/`
 - **Хранение данных**: локальные папки учеников с XOR-шифрованием (по логину)
-- **Сборка**: PyInstaller — единый EXE-файл для распространения
+- **Сборка**: PyInstaller — папка приложения с EXE и служебными файлами
 
 ### ⚠️ Известные ограничения
 
 - **Только Windows** — сборка под PyInstaller, Linux/macOS не поддерживаются
 - **Базовая изоляция процессов** — не является полноценной песочницей (ученик с опытом может выйти за пределы)
 - **python_env/ не в репозитории** — из-за размера, скачивается отдельно (см. кнопку выше)
-- **XOR — обфускация, не шифрование** — см. примечание в разделе технологий
+- **XOR — обфускация, не настоящее шифрование**; изображения и аудио не шифруются
 
 ### 🤔 Почему не VS Code?
 
@@ -292,7 +292,7 @@ MiniIDE не заменяет VS Code. Он решает задачу, кото�
 
 ### MiniIDE — Zero-Setup Python IDE for School Classrooms
 
-**MiniIDE** is a portable, classroom-ready Python development environment. The core idea: **students and teachers install nothing**. Python and Pygame are bundled inside — copy the folder to any Windows PC and it works immediately.
+**MiniIDE** is a portable, classroom-ready Python development environment. The core idea: **students and teachers install nothing**. Python and Pygame are supplied in the distribution folder — copy the complete folder to a Windows PC and run it without installation.
 
 ### 🎯 Why it was built
 
@@ -301,7 +301,7 @@ Installing Python in a school computer lab is a recurring problem: version misma
 - 📦 **Portable Python bundled** in `python_env/` — no system installation, works on any Windows PC
 - 🎮 **Pygame pre-installed** — students write games from day one, zero extra setup
 - 🔐 **Per-student login system** — each student has their own encrypted account; multiple students share one computer across sessions without conflict
-- 🙈 **Students cannot see each other's work** — files are encrypted per login (XOR keyed by username), copying between students is impossible
+- 🔐 **Separate work folders** — text files use username-based XOR obfuscation; this is not a full security boundary or sandbox
 - 💾 **Compiled to EXE** via PyInstaller — just double-click and run
 - 👩‍🏫 **Runs from a USB drive** — bring it to any classroom, plug in and teach
 
@@ -359,14 +359,14 @@ MiniIDE/
 - "📄 Create file" or "✚ Add file" — create or import files
 - **F5** or "▶ Run" — execute the code
 - Output and errors appear in the bottom console
-- Files are encrypted and protected from reading in Notepad
+- Text files are stored in obfuscated form; images and audio are not encrypted
 
 **⚠️ Troubleshooting**
 
 | Issue | Solution |
 |-------|----------|
 | Console is empty on run | Make sure `python_env/` is in the same folder as `MyMiniIDE.exe` |
-| App won't open | Try running as Administrator |
+| App won't open | Re-extract the archive and check that `python_env/` and `_internal/` are next to `MyMiniIDE.exe` |
 | Antivirus blocks it | Add to exclusions (false positive — common with PyInstaller apps) |
 
 ### 📁 Source Structure
@@ -392,16 +392,16 @@ MiniIDE/
 ### 🏗️ Architecture
 
 - GUI: PyQt6-based desktop interface
-- Code Execution: Isolated execution via QProcess
-- Python Runtime: Embedded portable interpreter (python_env)
-- Storage: Per-user encrypted directories (XOR-based)
-- Packaging: PyInstaller (single EXE distribution)
+- Code Execution: Child-process execution via QProcess; this is not a secure sandbox
+- Python Runtime: Portable interpreter supplied in `python_env/`
+- Storage: Per-user directories; text files use XOR obfuscation, while media files are stored unchanged
+- Packaging: PyInstaller onedir distribution with the EXE and support files
 
 ### ⚠️ Limitations
 
 - Windows-only (due to PyInstaller build)
-- Not a secure sandbox (process isolation is basic)
-- python_env not included in repo due to size
+- Not a secure sandbox; student code runs with the current user's OS permissions
+- If `python_env/` is missing, the application may fall back to system Python, which may not have Pygame installed
 > Note: XOR encryption is used as a lightweight obfuscation method, not as secure encryption.
 
 ### 🤔 Why not VS Code?
@@ -411,7 +411,7 @@ MiniIDE is designed for constrained classroom environments where:
 - Internet access is limited
 - Students share computers
 
-VS Code is powerful, but requires setup and admin access. MiniIDE works out of the box.
+VS Code is powerful, but requires setup. MiniIDE works from its complete distribution folder without installing Python or Pygame.
 
 ### 🚧 Roadmap
 
@@ -422,7 +422,7 @@ VS Code is powerful, but requires setup and admin access. MiniIDE works out of t
 
 ### 💡 Real Classroom Use
 
-Built and actively used at **PhysTech School Almaty**. The teacher sets up the folder once. Students launch `MyMiniIDE.exe`, log in, and start coding — no installation, no copying between students, no wasted class time.
+Built and actively used at **PhysTech School Almaty**. The teacher sets up the folder once. Students launch `MyMiniIDE.exe`, log in, and start coding — no installation, separate work folders, and less wasted class time.
 
 ### 👨‍💻 Author
 

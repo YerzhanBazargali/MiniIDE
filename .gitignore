@@ -12,6 +12,7 @@ _internal/
 # MiniIDE specific
 students/
 *.exe
+*.zip
 
 # OS
 .DS_Store
