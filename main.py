@@ -329,8 +329,12 @@ class MiniIDE(QWidget):
         # тихо убивал бы уже работающую программу ученика)
         self.runner.ensure_stopped()
 
-        # 2. Определяем путь запуска. Если файл не открыт, создаем untitled.py
-        if self.current_file:
+        # 2. Определяем путь запуска. current_file используется и для открытых
+        # картинок/аудио (для заголовка окна) — если сейчас "открыт" не .py
+        # файл, писать в него нельзя, иначе F5 зашифрует и запишет код поверх
+        # чужого изображения/аудио. В этом случае ведём себя как при
+        # отсутствии открытого файла — создаём untitled_script.py.
+        if self.current_file and self.current_file.endswith(".py"):
             run_path = self.current_file
         else:
             run_path = os.path.join(self.user_folder, "untitled_script.py")

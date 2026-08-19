@@ -9,10 +9,27 @@ from PyQt6.QtWidgets import QDialog, QLineEdit, QFormLayout, QDialogButtonBox, Q
 # было выйти за пределы папки пользователя) и двоеточие (чтобы не сломать формат).
 _LOGIN_PATTERN = re.compile(r'^[\w\-]+$', re.UNICODE)
 
+# Зарезервированные имена устройств Windows: логин используется как есть в
+# качестве имени папки students/<login>/, а Windows резервирует эти имена на
+# уровне ОС (независимо от регистра). "nul" на практике даже не бросает
+# ошибку при создании папки — os.makedirs() тихо "успевает", но реальная
+# папка не создаётся, и все последующие операции с файлами ученика будут
+# падать с непонятной ошибкой пути.
+_RESERVED_NAMES = {
+    "con", "prn", "aux", "nul",
+    *(f"com{i}" for i in range(1, 10)),
+    *(f"lpt{i}" for i in range(1, 10)),
+}
+
 
 def is_valid_login(login):
     """Проверяет, что логин безопасен для использования как имя папки и как ключ в auth_data.dat."""
-    return bool(login) and login not in (".", "..") and bool(_LOGIN_PATTERN.match(login))
+    return (
+        bool(login)
+        and login not in (".", "..")
+        and login.lower() not in _RESERVED_NAMES
+        and bool(_LOGIN_PATTERN.match(login))
+    )
 
 
 def crypt_data(data_bytes, login_str):
